@@ -11,7 +11,7 @@ python tools/train.py -f exps/example/yolox_voc/yolox_nano.py -d 1 -b 32 -c weig
 ```
 predict:
 ```
-python tools/demo.py image -f exps/example/yolox_voc/yolox_nano.py -c /home/RRAM_HKU/YOLOX/YOLOX_outputs/yolox_nano/best_ckpt.pth --path /home/RRAM_HKU/YOLOX/VOCdevkit/VOC2007/JPEGImages/07923.jpg --conf 0.25 --nms 0.45 --tsize 640 --save_result --device [cpu/gpu]
+python tools/demo.py image -f exps/example/yolox_voc/yolox_nano.py -c ./YOLOX_outputs/yolox_nano/best_ckpt.pth --path ./VOCdevkit/VOC2007/JPEGImages/07923.jpg --conf 0.25 --nms 0.45 --tsize 640 --save_result --device [cpu/gpu]
 ```
 
 
