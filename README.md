@@ -18,10 +18,12 @@ python tools/demo.py image -f exps/example/yolox_voc/yolox_nano.py -c /home/RRAM
 
 
 nanodet：
+
 train:
 ```
 python ./tools/train.py ./config/my_dataset.yml
 ```
 
 pridict:
-use predict.ipynb in /nanodet-main/
+
+use predict.ipynb in nanodet-main/
