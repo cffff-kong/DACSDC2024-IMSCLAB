@@ -1,0 +1,80 @@
+absl-py==2.1.0
+asttokens==2.4.1
+backcall==0.2.0
+Brotli @ file:///tmp/abs_ecyw11_7ze/croots/recipe/brotli-split_1659616059936/work
+cachetools==5.3.3
+certifi @ file:///croot/certifi_1707229174982/work/certifi
+charset-normalizer @ file:///tmp/build/80754af9/charset-normalizer_1630003229654/work
+contourpy==1.1.1
+cycler==0.12.1
+decorator==5.1.1
+executing==2.0.1
+fonttools==4.49.0
+google-auth==2.28.2
+google-auth-oauthlib==1.0.0
+grpcio==1.62.1
+h5py==3.10.0
+idna @ file:///croot/idna_1666125576474/work
+importlib_metadata==7.0.2
+importlib_resources==6.3.0
+ipython==8.12.3
+jedi==0.19.1
+kiwisolver==1.4.5
+loguru==0.5.3
+Markdown==3.6
+markdown-it-py==3.0.0
+MarkupSafe==2.1.5
+matplotlib==3.7.5
+matplotlib-inline==0.1.6
+mdurl==0.1.2
+mkl-fft @ file:///croot/mkl_fft_1695058164594/work
+mkl-random @ file:///croot/mkl_random_1695059800811/work
+mkl-service==2.4.0
+ninja==1.11.1.1
+numpy @ file:///work/mkl/numpy_and_numpy_base_1682953417311/work
+oauthlib==3.2.2
+onnx==1.15.0
+onnx-simplifier==0.4.10
+opencv-python==4.9.0.80
+packaging==24.0
+parso==0.8.3
+pexpect==4.9.0
+pickleshare==0.7.5
+pillow @ file:///croot/pillow_1707233021655/work
+prompt-toolkit==3.0.43
+protobuf==5.26.0
+psutil==5.9.8
+ptyprocess==0.7.0
+pure-eval==0.2.2
+pyasn1==0.5.1
+pyasn1-modules==0.3.0
+pycocotools==2.0.7
+Pygments==2.17.2
+pyparsing==3.1.2
+PySnooper==1.2.0
+PySocks @ file:///tmp/build/80754af9/pysocks_1605305779399/work
+python-dateutil==2.9.0.post0
+requests @ file:///croot/requests_1707355572290/work
+requests-oauthlib==1.4.0
+rich==13.7.1
+rsa==4.9
+scipy==1.10.1
+six==1.16.0
+stack-data==0.6.3
+tabulate==0.9.0
+tensorboard==2.14.0
+tensorboard-data-server==0.7.2
+thop==0.1.1.post2209072238
+torch==1.13.1
+torch-pruning==0.2.7
+torchaudio==0.13.1
+TorchSnooper==0.8
+torchvision==0.14.1
+tqdm==4.66.2
+traitlets==5.14.2
+typing_extensions @ file:///croot/typing_extensions_1705599297034/work
+urllib3 @ file:///croot/urllib3_1707770551213/work
+wcwidth==0.2.13
+Werkzeug==3.0.1
+-e git+ssh://git@github.com/Megvii-BaseDetection/YOLOX.git@ac58e0a5e68e57454b7b9ac822aced493b553c53#egg=yolox
+zipp==3.18.1
