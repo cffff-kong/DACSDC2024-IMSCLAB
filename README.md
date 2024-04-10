@@ -2,28 +2,56 @@
 
 For DAC2024
 
+for based_on_yolov8-pytorch-master
 
-YOLOX-nano:
 
-train:
+dataset root:
+you need to upload the dataset, replace Annotations, JPEGImages and label file loader.
+build ImageSets/Main file loader.
 ```
-python tools/train.py -f exps/example/yolox_voc/yolox_nano.py -d 1 -b 32 -c weights/yolox_nano.pth
+├─VOCdevit/VOC2007
+│ ├─Annotations
+│ │ ├─.xml
+│ ├─ImageSets
+│ │ ├─Main
+│ │ │ ├─test.txt
+│ │ │ ├─train.txt
+│ │ │ ├─trainval.txt
+│ │ │ ├─val.txt
+│ ├─JPEGImages
+│ │ ├─.jpg
+│ ├─label
+│ │ ├─.json
+│ ├─seg
+│ │ ├─.png
 ```
-predict:
+
+first, you need to generate the dataset.
+1.move to ./VOC2007
+2.run .py in order
 ```
-python tools/demo.py image -f exps/example/yolox_voc/yolox_nano.py -c ./YOLOX_outputs/yolox_nano/best_ckpt.pth --path ./VOCdevkit/VOC2007/JPEGImages/07923.jpg --conf 0.25 --nms 0.45 --tsize 640 --save_result --device [cpu/gpu]
-```
-
-
-
-
-nanodet：
-
-train:
-```
-python ./tools/train.py ./config/my_dataset.yml
+python del_Annotations.py
 ```
 
-pridict:
+```
+python del_imgs.py
+```
 
-use predict.ipynb in nanodet-main/
+```
+python gen_seg.py
+```
+
+second, you need generate the train txt
+1.move to ./based_on_yolov8-pytorch-master
+2.run .py
+```
+python voc_annotation.py
+```
+then you will get 2007_train.txt, 2007_val.txt, seg_train.txt, seg_val.txt
+
+third, run train.py
+```
+python train.py
+```
+
+
