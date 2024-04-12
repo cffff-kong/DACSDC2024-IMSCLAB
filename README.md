@@ -54,5 +54,12 @@ third, run train.py
 python train.py
 ```
 
+about how to predict
 
+find the training model in /log, then modified the yolo.py( "model_path" ) in the root file loader.
+
+```
+python predict.py
+```
+input the path of image.
 
