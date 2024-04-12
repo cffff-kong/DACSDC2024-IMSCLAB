@@ -22,6 +22,9 @@ class LossHistory():
     def __init__(self, log_dir, model, input_shape):
         self.log_dir    = log_dir
         self.losses     = []
+        self.val_det_loss   = []
+        self.val_seg_loss = []
+        self.score = []
         self.val_loss   = []
         
         os.makedirs(self.log_dir)
@@ -32,22 +35,45 @@ class LossHistory():
         # except:
         #     pass
 
-    def append_loss(self, epoch, loss, val_loss):
+    def append_loss(self, epoch, loss, val_det_loss, val_seg_loss, score, val_loss):
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
 
         self.losses.append(loss)
         self.val_loss.append(val_loss)
+        self.val_det_loss.append(val_det_loss)
+        self.val_seg_loss.append(val_seg_loss)
+        self.score.append(score)
+        names = ["acc", "acc_cls", "mean_iu"]
 
-        with open(os.path.join(self.log_dir, "epoch_loss.txt"), 'a') as f:
-            f.write(str(loss))
-            f.write("\n")
         with open(os.path.join(self.log_dir, "epoch_val_loss.txt"), 'a') as f:
             f.write(str(val_loss))
             f.write("\n")
+        with open(os.path.join(self.log_dir, "epoch_loss.txt"), 'a') as f:
+            f.write(str(loss))
+            f.write("\n")
+        with open(os.path.join(self.log_dir, "epoch_val_det_loss.txt"), 'a') as f:
+            f.write(str(val_det_loss))
+            f.write("\n")
+        with open(os.path.join(self.log_dir, "epoch_val_seg_loss.txt"), 'a') as f:
+            f.write(str(val_seg_loss))
+            f.write("\n")
+        with open(os.path.join(self.log_dir, "epoch_val_seg_score.txt"), 'a') as f:
+            for name, value in zip(names, score):
+                f.write(f"{name}: {value}\n")
 
+
+        print("score:", score)
+        print("type of score:", type(score))
+        print("val_seg_loss:", val_seg_loss)
+        print("type of val_seg_loss:", type(val_seg_loss))
+
+        
         self.writer.add_scalar('loss', loss, epoch)
+        self.writer.add_scalar('val_det_loss', val_det_loss, epoch)
+        self.writer.add_scalar('val_seg_loss', val_seg_loss, epoch)
         self.writer.add_scalar('val_loss', val_loss, epoch)
+        # self.writer.add_scalar('val_score', score, epoch)
         self.loss_plot()
 
     def loss_plot(self):
@@ -55,7 +81,9 @@ class LossHistory():
 
         plt.figure()
         plt.plot(iters, self.losses, 'red', linewidth = 2, label='train loss')
-        plt.plot(iters, self.val_loss, 'coral', linewidth = 2, label='val loss')
+        plt.plot(iters, self.val_det_loss, 'coral', linewidth = 2, label='val det loss')
+        plt.plot(iters, self.val_seg_loss, 'blue', linewidth = 2, label='val seg loss')
+        
         # try:
         #     if len(self.losses) < 25:
         #         num = 5

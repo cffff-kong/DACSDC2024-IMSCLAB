@@ -50,6 +50,9 @@ class DecodeBox():
         # dbox  batch_size, 4, 8400
         # cls   batch_size, 20, 8400
         dbox, cls, origin_cls, anchors, strides = inputs
+        # print("dbox:", dbox)
+        # print("cls:", cls)
+        # print("anchors:", anchors)
         # 获得中心宽高坐标
         dbox    = dist2bbox(dbox, anchors.unsqueeze(0), xywh=True, dim=1) * strides
         y       = torch.cat((dbox, cls.sigmoid()), 1).permute(0, 2, 1)
@@ -97,7 +100,9 @@ class DecodeBox():
         prediction[:, :, :4] = box_corner[:, :, :4]
 
         output = [None for _ in range(len(prediction))]
+
         for i, image_pred in enumerate(prediction):
+
             #----------------------------------------------------------#
             #   对种类预测部分取max。
             #   class_conf  [num_anchors, 1]    种类置信度
@@ -105,17 +110,25 @@ class DecodeBox():
             #----------------------------------------------------------#
             class_conf, class_pred = torch.max(image_pred[:, 4:4 + num_classes], 1, keepdim=True)
 
+            # with open('/home/RRAM_HKU/yolo/based_yolov8-pytorch-master/predict/image_pred.txt', 'w') as f:
+            #     np.savetxt(f, image_pred.cpu().numpy(), fmt='%s')
+
+
+
+
             #----------------------------------------------------------#
             #   利用置信度进行第一轮筛选
             #----------------------------------------------------------#
             conf_mask = (class_conf[:, 0] >= conf_thres).squeeze()
-            
             #----------------------------------------------------------#
             #   根据置信度进行预测结果的筛选
             #----------------------------------------------------------#
+ 
             image_pred = image_pred[conf_mask]
             class_conf = class_conf[conf_mask]
             class_pred = class_pred[conf_mask]
+
+
             if not image_pred.size(0):
                 continue
             #-------------------------------------------------------------------------#
@@ -148,6 +161,7 @@ class DecodeBox():
                     nms_thres
                 )
                 max_detections = detections_class[keep]
+
                 
                 # # 按照存在物体的置信度排序
                 # _, conf_sort_index = torch.sort(detections_class[:, 4]*detections_class[:, 5], descending=True)

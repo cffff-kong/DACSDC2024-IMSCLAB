@@ -25,8 +25,8 @@ class YOLO(object):
         #   验证集损失较低不代表mAP较高，仅代表该权值在验证集上泛化性能较好。
         #   如果出现shape不匹配，同时要注意训练时的model_path和classes_path参数的修改
         #--------------------------------------------------------------------------#
-        "model_path"        : 'model_data/yolov8_s.pth',
-        "classes_path"      : 'model_data/coco_classes.txt',
+        "model_path"        : '/home/RRAM_HKU/yolo/based_yolov8-pytorch-master/logs/last_epoch_weights.pth',
+        "classes_path"      : 'model_data/voc_classes.txt',
         #---------------------------------------------------------------------#
         #   输入图片的大小，必须为32的倍数。
         #---------------------------------------------------------------------#
@@ -43,7 +43,7 @@ class YOLO(object):
         #---------------------------------------------------------------------#
         #   只有得分大于置信度的预测框会被保留下来
         #---------------------------------------------------------------------#
-        "confidence"        : 0.5,
+        "confidence"        : 0.005,
         #---------------------------------------------------------------------#
         #   非极大抑制所用到的nms_iou大小
         #---------------------------------------------------------------------#
@@ -107,7 +107,9 @@ class YOLO(object):
         print('{} model, and classes loaded.'.format(self.model_path))
         if not onnx:
             if self.cuda:
+                #############################################################改
                 self.net = nn.DataParallel(self.net)
+                # torch.backends.cudnn.enabled = False
                 self.net = self.net.cuda()
 
     #---------------------------------------------------#
@@ -142,16 +144,31 @@ class YOLO(object):
             #   将图像输入网络当中进行预测！
             #---------------------------------------------------------#
             outputs = self.net(images)
-            outputs = self.bbox_util.decode_box(outputs)
+            # im = outputs[1][0, :2, :, :].cpu()
+            outputs = self.bbox_util.decode_box(outputs[0])
+
+            #  # 转换为NumPy数组
+            # numpy_array = im.detach().numpy()
+
+            # import matplotlib.pyplot as plt
+            # # 使用Matplotlib绘制图像
+            # plt.imshow(numpy_array.transpose(1, 2, 0))  # 转置通道顺序为RGB
+            # plt.axis('off')  # 不显示坐标轴
+            # plt.show()
+            # plt.savefig('/home/RRAM_HKU/yolo/based_yolov8-pytorch-master/predict/1.png')
+
             #---------------------------------------------------------#
             #   将预测框进行堆叠，然后进行非极大抑制
             #---------------------------------------------------------#
-            results = self.bbox_util.non_max_suppression(outputs, self.num_classes, self.input_shape, 
-                        image_shape, self.letterbox_image, conf_thres = self.confidence, nms_thres = self.nms_iou)
-                                                    
-            if results[0] is None: 
-                return image
 
+            #############################################################改
+
+            results = self.bbox_util.non_max_suppression(outputs, self.num_classes, self.input_shape, 
+                        image_shape, self.letterbox_image, conf_thres = self.confidence, nms_thres = self.nms_iou)         
+                 
+            if results[0] is None: 
+                print('No object detected in the image.')
+                return image
             top_label   = np.array(results[0][:, 5], dtype = 'int32')
             top_conf    = results[0][:, 4]
             top_boxes   = results[0][:, :4]

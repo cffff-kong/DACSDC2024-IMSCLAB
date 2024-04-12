@@ -452,23 +452,38 @@ class SegDataset(Dataset):
 
         image = np.array(image)
         mask = np.array(mask)
-        # mask = np.stack([mask, mask, mask], axis=-1)
-        mask = np.stack([mask, mask, mask], axis=-1)
-        mask = mask.transpose((2, 0, 1))
 
-        return image, mask
+        mask[mask == 255] = 0
+
+       
+        mask_8 = np.where(mask == 8, 8, 0)  
+        mask_9 = np.where(mask == 9, 9, 0)   
+        mask_10 = np.where(mask == 10, 10, 0) 
+        mask_new = np.stack([mask_8, mask_9, mask_10], axis=-1)
+        mask_1 = np.expand_dims(mask, axis=-1)
+
+        mask_1 = mask_1.transpose((2, 0, 1))
+        mask_new = mask_new.transpose((2, 0, 1))
+        image = image.transpose((2, 0, 1))
+
+        return image, mask_new, mask_1
 
 
 def seg_dataset_collate(batch):
     images = []
     masks = []
-    for img, mask in batch:
-        # images.append(img)
+    mask_scores = []
+    for img, mask, mask_1 in batch:
+        images.append(img)
         masks.append(mask)
+        mask_scores.append(mask_1)
 
-    images = torch.from_numpy(np.array(images)).type(torch.FloatTensor)
+    
     masks = torch.stack([torch.from_numpy(mask) for mask in masks], dim=0).type(torch.FloatTensor)
+    images = torch.stack([torch.from_numpy(image) for image in images], dim=0).type(torch.FloatTensor)
+    mask_scores = torch.stack([torch.from_numpy(mask_1) for mask_1 in mask_scores], dim=0).type(torch.FloatTensor)
 
-    return images, masks
+
+    return images, masks, mask_scores
 
 
