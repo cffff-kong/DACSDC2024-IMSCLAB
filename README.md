@@ -2,6 +2,10 @@
 
 For DAC2024
 
+2024.4.15
+A new folder has been added that only adds the HEAD of the segmentation task, but the LOSS is not involved in the calculation, and the codes in this folder can be used to verify where the problem is occurring.
+
+
 for based_on_yolov8-pytorch-master
 
 
