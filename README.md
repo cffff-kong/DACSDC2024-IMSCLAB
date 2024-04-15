@@ -5,6 +5,10 @@ For DAC2024
 2024.4.15
 A new folder has been added that only adds the HEAD of the segmentation task, but the LOSS is not involved in the calculation, and the codes in this folder can be used to verify where the problem is occurring.
 
+2024.4.15
+还是写中文了，看得清楚些。
+我把seg的数据集加入到了总的dataloader里面，然后我把mosaic数据增强整个删掉了，然后发现模型可以用了，就很神奇。
+
 
 for based_on_yolov8-pytorch-master
 
