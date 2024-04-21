@@ -50,7 +50,7 @@ python gen_seg.py
 ```
 
 second, you need generate the train txt
-1.move to ./based_on_yolov8-pytorch-master
+1.move to root
 2.run .py
 ```
 python voc_annotation.py
