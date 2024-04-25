@@ -2,6 +2,9 @@
 
 For DAC2024
 
+2024.4.25
+新增DAC-pure，去掉了打分等功能，实现了仅seg+det的效果，用作基准版，后续添加功能前先在该版本测试
+
 2024.4.15
 A new folder has been added that only adds the HEAD of the segmentation task, but the LOSS is not involved in the calculation, and the codes in this folder can be used to verify where the problem is occurring.
 
