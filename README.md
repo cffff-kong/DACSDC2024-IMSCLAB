@@ -3,8 +3,10 @@
 For DAC2024
 
 2024.4.29
-新增两个nano文件夹，其中数据集和logs文件夹删除，需要重新在root下创建一个logs文件夹，再把voc2007复制进对应路径，之后运行voc_annotations.py即可
-
+新增两个nano文件夹，其中数据集和logs文件夹删除，需要重新在root下创建一个logs文件夹，再把voc2007复制进对应路径，之后运行voc_annotations.py即可。此外共享链接里面是两个pretrain model和两个train后的目前最好版本。
+```
+https://connecthkuhk-my.sharepoint.com/:f:/g/personal/jklee_connect_hku_hk/EoPtJkYYUwFNhH54T_NyOFQBkwYa_jLI2xg0bGCPvfTWXQ?e=N0Y8tQ
+```
 2024.4.25
 新增DAC-pure，去掉了打分等功能，实现了仅seg+det的效果，用作基准版，后续添加功能前先在该版本测试
 
