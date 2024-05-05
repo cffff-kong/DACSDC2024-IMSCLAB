@@ -1,0 +1,13 @@
+﻿based-on-yolov8/logs
+based-on-yolov8/model_pre
+based-on-yolov8/nets/__pycache__
+based-on-yolov8/utils/__pycache__
+based-on-yolov8/2007_train.txt
+based-on-yolov8/2007_val.txt
+based-on-yolov8/seg_train.txt
+based-on-yolov8/seg_val.txt
+yolov8-s-original/img_out
+yolov8-s-original/2007_train.txt
+yolov8-s-original/2007_val.txt
+yolov8-s-original/seg_train.txt
+yolov8-s-original/seg_val.txt

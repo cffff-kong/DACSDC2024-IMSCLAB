@@ -15,7 +15,7 @@ from utils.utils_bbox import DecodeBox
 import cv2
 
 from PIL import Image
-
+is_prune = True
 '''
 训练自己的数据集必看注释！
 '''
@@ -107,13 +107,21 @@ class YOLO(object):
         
         device      = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.net.load_state_dict(torch.load(self.model_path, map_location=device))
+        if(is_prune != True):
+            self.net    = self.net.fuse().eval()
+            print('{} model, and classes loaded.'.format(self.model_path))
+            if not onnx:
+                if self.cuda:
+                    self.net = nn.DataParallel(self.net)
+                    self.net = self.net.cuda()
+
+    def generate_fuse(self, onnx=False):
         self.net    = self.net.fuse().eval()
         print('{} model, and classes loaded.'.format(self.model_path))
-        if not onnx:
+        if not onnx: 
             if self.cuda:
                 self.net = nn.DataParallel(self.net)
                 self.net = self.net.cuda()
-
     #---------------------------------------------------#
     #   检测图片
     #---------------------------------------------------#

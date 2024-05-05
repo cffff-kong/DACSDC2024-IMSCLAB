@@ -23,8 +23,8 @@ def pth_to_onnx(input, checkpoint, onnx_path, input_names=['input'], output_name
     print("Exporting .pth model to onnx model has been successful!")
 
 if __name__ == '__main__':
-    os.environ['CUDA_VISIBLE_DEVICES']='5'
-    checkpoint = './logs/ep080-loss6.296-val_loss4.052.pth'
+    os.environ['CUDA_VISIBLE_DEVICES']='0'
+    checkpoint = './logs/last_epoch_weights.pth'
     onnx_path = './logs/yolos.onnx'
     input = torch.randn(1, 3, 640, 640)
     # device = torch.device("cuda:2" if torch.cuda.is_available() else 'cpu')

@@ -24,6 +24,7 @@ from utils.utils_fit import fit_one_epoch
 
 from mmcv.runner import load_checkpoint
 
+from utils.prune_model import prune, count_params
 '''
 训练自己的目标检测模型一定需要注意以下几点：
 1、训练前仔细检查自己的格式是否满足要求，该库要求数据集格式为VOC格式，需要准备好的内容有输入图片和标签
@@ -96,7 +97,8 @@ if __name__ == "__main__":
     #      可以设置mosaic=True，直接随机初始化参数开始训练，但得到的效果仍然不如有预训练的情况。（像COCO这样的大数据集可以这样做）
     #   2、了解imagenet数据集，首先训练分类模型，获得网络的主干部分权值，分类模型的 主干部分 和该模型通用，基于此进行训练。
     #----------------------------------------------------------------------------------------------------------------------------#
-    model_path      = './logs/ep090-loss6.180-val_loss4.002.pth'
+    # model_path      = './model_data/yolov8_s.pth'
+    model_path      = './model_data/best0503.pth'
     #------------------------------------------------------#
     #   input_shape     输入的shape大小，一定要是32的倍数
     #------------------------------------------------------#
@@ -138,7 +140,7 @@ if __name__ == "__main__":
     #------------------------------------------------------------------#
     #   label_smoothing     标签平滑。一般0.01以下。如0.01、0.005。
     #------------------------------------------------------------------#
-    label_smoothing     = 0
+    label_smoothing     = 0.005
 
     #----------------------------------------------------------------------------------------------------------------------------#
     #   训练分为两个阶段，分别是冻结阶段和解冻阶段。设置冻结阶段是为了满足机器性能不足的同学的训练需求。
@@ -242,7 +244,7 @@ if __name__ == "__main__":
     #                   开启后会加快数据读取速度，但是会占用更多内存
     #                   内存较小的电脑可以设置为2或者0  
     #------------------------------------------------------------------#
-    num_workers         = 4
+    num_workers         = 2
 
     #------------------------------------------------------#
     #   train_annotation_path   训练图片路径和标签
@@ -363,6 +365,23 @@ if __name__ == "__main__":
             print("\nFail To Load Key:", str(no_load_key)[:500], "……\nFail To Load Key num:", len(no_load_key))
             print("\n\033[1;33;44m温馨提示，head部分没有载入是正常现象，Backbone部分没有载入是错误的。\033[0m")
 
+    #-------------------------------------------------------------------------#
+    #   is_prune = True   代表进行模型通道剪枝
+    #   prune(model, percentage):
+    #   input:  model 需要加载好模型参数
+    #           percentage channal剪枝的百分比
+    #   output: prune_model 裁剪好的model
+    #   和predict部分有一点差别，没加fuse
+    #-------------------------------------------------------------------------#
+    is_prune = True
+
+    if is_prune == True:
+        total_param = count_params(model)
+        print("Number of parameter: %.2fM" % (total_param / 1e6))
+        percentage = 0.5
+        prune(model, percentage)
+        total_prune_param = count_params(model)
+        print("Number of pruned model parameter: %.2fM" % (total_prune_param / 1e6))
     #----------------------#
     #   获得损失函数
     #----------------------#

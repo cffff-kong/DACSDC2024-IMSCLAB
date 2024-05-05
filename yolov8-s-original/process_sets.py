@@ -1,5 +1,5 @@
-val_file = "./VOCdevkit/VOC2007/ImageSets/Main/val.txt"
-train_file = "./VOCdevkit/VOC2007/ImageSets/Main/train.txt"
+val_file = "../VOCdevkit/VOC2007/ImageSets/Main/val.txt"
+train_file = "../VOCdevkit/VOC2007/ImageSets/Main/train.txt"
 
 # 读取val.txt中的内容，并提取数字去掉下划线后的内容
 with open(val_file, 'r') as f:
@@ -10,12 +10,12 @@ with open(train_file, 'r') as f:
     train_content = [line.strip().split('_')[0] for line in f.readlines()]
 
 # 将提取的内容写入val_new.txt
-val_new_file = "./VOCdevkit/VOC2007/ImageSets/Main/val_new.txt"
+val_new_file = "../VOCdevkit/VOC2007/ImageSets/Main/val_new.txt"
 with open(val_new_file, 'w') as f:
     f.write('\n'.join(val_content))
 
 # 将提取的内容写入train_new.txt
-train_new_file = "./VOCdevkit/VOC2007/ImageSets/Main/train_new.txt"
+train_new_file = "../VOCdevkit/VOC2007/ImageSets/Main/train_new.txt"
 with open(train_new_file, 'w') as f:
     f.write('\n'.join(train_content))
 

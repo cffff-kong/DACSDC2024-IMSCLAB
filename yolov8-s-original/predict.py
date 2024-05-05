@@ -9,9 +9,11 @@ import numpy as np
 from PIL import Image
 
 from yolo import YOLO
-
+from utils.prune_model import prune, count_params
 if __name__ == "__main__":
     yolo = YOLO()
+    # for name, module in yolo.net.named_modules():
+    #     print(name)
     #----------------------------------------------------------------------------------------------------------#
     #   mode用于指定测试的模式：
     #   'predict'           表示单张图片预测，如果想对预测过程进行修改，如保存图片，截取对象等，可以先看下方详细的注释
@@ -21,7 +23,7 @@ if __name__ == "__main__":
     #   'heatmap'           表示进行预测结果的热力图可视化，详情查看下方注释。
     #   'export_onnx'       表示将模型导出为onnx，需要pytorch1.7.1以上。
     #----------------------------------------------------------------------------------------------------------#
-    mode = "predict"
+    mode = "dir_predict"
     #-------------------------------------------------------------------------#
     #   crop                指定了是否在单张图片预测后对目标进行截取
     #   count               指定了是否进行目标的计数
@@ -49,14 +51,14 @@ if __name__ == "__main__":
     #   test_interval和fps_image_path仅在mode='fps'有效
     #----------------------------------------------------------------------------------------------------------#
     test_interval   = 1000
-    fps_image_path  = "./VOCdevkit/VOC2007/JPEGImages/00010.jpg"
+    fps_image_path  = "../VOCdevkit/VOC2007/JPEGImages/00010.jpg"
     #-------------------------------------------------------------------------#
     #   dir_origin_path     指定了用于检测的图片的文件夹路径
     #   dir_save_path       指定了检测完图片的保存路径
     #   
     #   dir_origin_path和dir_save_path仅在mode='dir_predict'时有效
     #-------------------------------------------------------------------------#
-    dir_origin_path = "img/"
+    dir_origin_path = "../VOCdevkit/VOC2007/JPEGImages/"
     dir_save_path   = "img_out/"
     #-------------------------------------------------------------------------#
     #   heatmap_save_path   热力图的保存路径，默认保存在model_data下
@@ -70,6 +72,26 @@ if __name__ == "__main__":
     #-------------------------------------------------------------------------#
     simplify        = True
     onnx_save_path  = "model_data/models.onnx"
+
+    #-------------------------------------------------------------------------#
+    #   is_prune = True   代表进行模型通道剪枝
+    #   prune(model, percentage):
+    #   input:  model 需要加载好模型参数
+    #           percentage channal剪枝的百分比
+    #   output: prune_model 裁剪好的model
+    #-------------------------------------------------------------------------#
+    is_prune = True
+
+
+    if is_prune == True:
+        total_param = count_params(yolo.net)
+        print("Number of parameter: %.2fM" % (total_param / 1e6))
+        percentage = 0.5
+        prune(yolo.net, percentage)
+        yolo.generate_fuse()
+        total_prune_param = count_params(yolo.net)
+        print("Number of pruned model parameter: %.2fM" % (total_prune_param / 1e6))
+
 
     if mode == "predict":
         '''
