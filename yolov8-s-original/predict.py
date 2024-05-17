@@ -23,7 +23,7 @@ if __name__ == "__main__":
     #   'heatmap'           表示进行预测结果的热力图可视化，详情查看下方注释。
     #   'export_onnx'       表示将模型导出为onnx，需要pytorch1.7.1以上。
     #----------------------------------------------------------------------------------------------------------#
-    mode = "dir_predict"
+    mode = "predict"
     #-------------------------------------------------------------------------#
     #   crop                指定了是否在单张图片预测后对目标进行截取
     #   count               指定了是否进行目标的计数
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     if is_prune == True:
         total_param = count_params(yolo.net)
         print("Number of parameter: %.2fM" % (total_param / 1e6))
-        percentage = 0.5
+        percentage = 0.5           #裁掉的比例，可选0，0.125,0.25,0.5,0.75,0.875之类的
         prune(yolo.net, percentage)
         yolo.generate_fuse()
         total_prune_param = count_params(yolo.net)
@@ -102,16 +102,19 @@ if __name__ == "__main__":
         4、如果想要在预测图上写额外的字，比如检测到的特定目标的数量，可以进入yolo.detect_image函数，在绘图部分对predicted_class进行判断，
         比如判断if predicted_class == 'car': 即可判断当前目标是否为车，然后记录数量即可。利用draw.text即可写字。
         '''
-        while True:
-            img = input('Input image filename:')
-            try:
-                image = Image.open(img)
-            except:
-                print('Open Error! Try again!')
-                continue
-            else:
-                r_image = yolo.detect_image(image, crop = crop, count=count)
-                r_image.save('./logs/output_image.png')
+        # while True:
+        #     img = input('Input image filename:')
+        #     try:
+        #         image = Image.open(img)
+        #     except:
+        #         print('Open Error! Try again!')
+        #         continue
+        #     else:
+                # r_image = yolo.detect_image(image, crop = crop, count=count)
+                # r_image.save('./logs/output_image.png')
+        image = Image.open("./img/street.jpg")
+        r_image = yolo.detect_image(image, crop = crop, count=count)
+        r_image.save('./img_out/output_image.png')
 
     elif mode == "video":
         capture = cv2.VideoCapture(video_path)
