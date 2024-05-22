@@ -8,10 +8,12 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from yolo import YOLO
-
+from yolo import YOLO, is_prune
+from utils.prune_model import prune, count_params, is_prune
 if __name__ == "__main__":
     yolo = YOLO()
+    # for name, module in yolo.net.named_modules():
+    #     print(name)
     #----------------------------------------------------------------------------------------------------------#
     #   mode用于指定测试的模式：
     #   'predict'           表示单张图片预测，如果想对预测过程进行修改，如保存图片，截取对象等，可以先看下方详细的注释
@@ -49,14 +51,14 @@ if __name__ == "__main__":
     #   test_interval和fps_image_path仅在mode='fps'有效
     #----------------------------------------------------------------------------------------------------------#
     test_interval   = 1000
-    fps_image_path  = "./VOCdevkit/VOC2007/JPEGImages/00009.jpg"
+    fps_image_path  = "../VOCdevkit/VOC2007/JPEGImages/00010.jpg"
     #-------------------------------------------------------------------------#
     #   dir_origin_path     指定了用于检测的图片的文件夹路径
     #   dir_save_path       指定了检测完图片的保存路径
     #   
     #   dir_origin_path和dir_save_path仅在mode='dir_predict'时有效
     #-------------------------------------------------------------------------#
-    dir_origin_path = "img/"
+    dir_origin_path = "../VOCdevkit/VOC2007/JPEGImages/"
     dir_save_path   = "img_out/"
     #-------------------------------------------------------------------------#
     #   heatmap_save_path   热力图的保存路径，默认保存在model_data下
@@ -71,6 +73,26 @@ if __name__ == "__main__":
     simplify        = True
     onnx_save_path  = "model_data/models.onnx"
 
+    #-------------------------------------------------------------------------#
+    #   is_prune = True   代表进行模型通道剪枝
+    #   prune(model, percentage):
+    #   input:  model 需要加载好模型参数
+    #           percentage channal剪枝的百分比
+    #   output: prune_model 裁剪好的model
+    #-------------------------------------------------------------------------#
+
+
+    if is_prune == True:
+        total_param = count_params(yolo.net)
+        print("Number of parameter: %.2fM" % (total_param / 1e6))
+        # percentage = 0.5           #裁掉的比例，可选0，0.125,0.25,0.5,0.75,0.875之类的
+        # prune(yolo.net, percentage)
+        prune(yolo.net)
+        yolo.generate_fuse()
+        total_prune_param = count_params(yolo.net)
+        print("Number of pruned model parameter: %.2fM" % (total_prune_param / 1e6))
+
+
     if mode == "predict":
         '''
         1、如果想要进行检测完的图片的保存，利用r_image.save("img.jpg")即可保存，直接在predict.py里进行修改即可。 
@@ -80,16 +102,19 @@ if __name__ == "__main__":
         4、如果想要在预测图上写额外的字，比如检测到的特定目标的数量，可以进入yolo.detect_image函数，在绘图部分对predicted_class进行判断，
         比如判断if predicted_class == 'car': 即可判断当前目标是否为车，然后记录数量即可。利用draw.text即可写字。
         '''
-        while True:
-            img = input('Input image filename:')
-            try:
-                image = Image.open(img)
-            except:
-                print('Open Error! Try again!')
-                continue
-            else:
-                r_image = yolo.detect_image(image, crop = crop, count=count)
-                r_image.save('./logs/output_image.png')
+        # while True:
+        #     img = input('Input image filename:')
+        #     try:
+        #         image = Image.open(img)
+        #     except:
+        #         print('Open Error! Try again!')
+        #         continue
+        #     else:
+                # r_image = yolo.detect_image(image, crop = crop, count=count)
+                # r_image.save('./logs/output_image.png')
+        image = Image.open("./img/street.jpg")
+        r_image = yolo.detect_image(image, crop = crop, count=count)
+        r_image.save('./img_out/output_image.png')
 
     elif mode == "video":
         capture = cv2.VideoCapture(video_path)

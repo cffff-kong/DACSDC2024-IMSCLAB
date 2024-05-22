@@ -8,88 +8,99 @@ import numpy as np
 # from loguru import logger
 import copy
 import re 
+#-------------------------------------------------------------------------#
+#   is_prune = True   代表进行模型通道剪枝
+#-------------------------------------------------------------------------#
+is_prune = True
 
 def count_params(module):
     return sum([p.numel() for p in module.parameters()])
 
-def prune(model, percentage):
+def prune(model, percentage = 0.25): #裁掉的比例，可选0，0.125,0.25,0.5,0.75,0.875之类的
+    print("is_prune=", is_prune, "percentage=", percentage)
     # 计算每个通道的L1-norm并排序
     sorted_channels_list = {}
     prune_model = copy.deepcopy(model)
     device = next(model.parameters()).device
-    c1 = 64
+    c1 = 64  # 'n'
     c3 = 256
     for name, module in prune_model.named_modules():
-        print(name, end=" ")
+        # print(name, end=" ")
         if "backbone" in name or "linear_c" in name:
-            print(" ")
+            # print(" ")
             continue
         if isinstance(module, (nn.Conv2d, nn.BatchNorm2d)):
             # torch.norm用于计算张量的范数,可以计算每个通道上的L1范数 conv.weight.data shape [out_channels,in_channels, k,k]
             if isinstance(module, nn.Conv2d):
-                print(module.in_channels,module.out_channels, end=" ")
-                module_shape = module.weight.data.shape
+                # print(module.in_channels,module.out_channels, end=" ")
+                # module_shape = module.weight.data.shape
                 if "conv3" in name:
                     nstr = name.split(".", 1)[0]
                 else:
                     nstr = "?"
-                
+                sorted_channels_input = "default"
                 # 对in_channal维裁剪
                 if "linear_fuse" == name or "conv3_for_upsample1.cv1.conv" == name :
-                    conv_weight_data = module.weight.data
                     in_channels = module.in_channels
+                    conv_weight_data = module.weight.data
                 elif "conv3_for_upsample2.cv1.conv" == name:
-                    in_channels = int((module.in_channels-c1) * (1-percentage)) + c1     # 128是backbone的feat1的channal
-                    sorted_channels_upsample2cv1=np.concatenate((sorted_channels_old[int(-1*out_channels_old):],range(module.in_channels-c1,module.in_channels)))   
-                    conv_weight_data = module.weight.data[:, sorted_channels_upsample2cv1, ...] 
+                    in_channels = int((module.in_channels-c1) * (1-percentage)) + c1      # 128是backbone的feat1的channal
+                    sorted_channels_input=np.concatenate((sorted_channels_old[int(-1*out_channels_old):],np.array(range(module.in_channels-c1,module.in_channels))))   
+                    conv_weight_data = module.weight.data[:,sorted_channels_input , ...] 
                 elif "conv3_for_downsample1.cv1.conv" == name:
                     in_channels = int((module.in_channels) * (1-percentage))
-                    sorted_channels_downsample1cv1 = np.concatenate((sorted_channels_old[int(-1*out_channels_old):],sorted_channels_list["conv3_for_upsample1.cv2.conv"][-1*int((in_channels-out_channels_old)):]))
-                    conv_weight_data = module.weight.data[:, sorted_channels_downsample1cv1, ...]    
+                    sorted_channels_input = np.concatenate((sorted_channels_old[int(-1*out_channels_old):],(sorted_channels_list["conv3_for_upsample1.cv2.conv"][-1*int((in_channels-out_channels_old)):] + out_channels_old)))
+                    conv_weight_data = module.weight.data[:,sorted_channels_input , ...]    
                 elif "conv3_for_downsample2.cv1.conv" == name:
                     in_channels = int((module.in_channels-c3) * (1-percentage)) + c3      # 512是backbone的feat3的channal
-                    sorted_channels_downsample2cv1=np.concatenate((sorted_channels_old[int(-1*out_channels_old):],range(module.in_channels-c3,module.in_channels)))   
-                    conv_weight_data = module.weight.data[:, sorted_channels_downsample2cv1, ...] 
+                    sorted_channels_input=np.concatenate((sorted_channels_old[int(-1*out_channels_old):],np.array(range(module.in_channels-c3,module.in_channels))))   
+                    conv_weight_data = module.weight.data[:,sorted_channels_input , ...] 
                 elif "cv2.0.0.conv" == name or "cv3.0.0.conv" == name:
                     in_channels = int((module.in_channels) * (1-percentage))
-                    conv_weight_data = module.weight.data[:,sorted_channels_list["conv3_for_upsample2.cv2.conv"][module.in_channels-in_channels:] , ...]    
+                    sorted_channels_input = sorted_channels_list["conv3_for_upsample2.cv2.conv"][-1*in_channels:]
+                    conv_weight_data = module.weight.data[:,sorted_channels_input , ...]    
                 elif "cv2.1.0.conv" == name or "cv3.1.0.conv" == name:
                     in_channels = int((module.in_channels) * (1-percentage))
-                    conv_weight_data = module.weight.data[:,sorted_channels_list["conv3_for_downsample1.cv2.conv"][module.in_channels-in_channels:] , ...]    
+                    sorted_channels_input = sorted_channels_list["conv3_for_downsample1.cv2.conv"][-1*in_channels:]
+                    conv_weight_data = module.weight.data[:,sorted_channels_input , ...]    
                     pass
                 elif "cv2.2.0.conv" == name or "cv3.2.0.conv" == name:
                     in_channels = int((module.in_channels) * (1-percentage))
-                    conv_weight_data = module.weight.data[:,sorted_channels_list["conv3_for_downsample2.cv2.conv"][module.in_channels-in_channels:] , ...]    
+                    sorted_channels_input = sorted_channels_list["conv3_for_downsample2.cv2.conv"][-1*in_channels:] 
+                    conv_weight_data = module.weight.data[:,sorted_channels_input , ...]    
                     pass
                 elif re.match(r"cv\d.\d.\d.conv",name) or re.match(r"cv\d.\d.\d",name) or "dfl" == name:
-                    conv_weight_data = module.weight.data
                     in_channels = module.in_channels
+                    conv_weight_data = module.weight.data
                 elif "conv3" in name:     #TODO
-                    in_channels = int(module.in_channels * (1-percentage))
-                    conv_weight_data = module.weight.data[:, sorted_channels_old[-1*in_channels:], ...]    
-                    if "m.0." in name:
-                        pass
-                    elif "cv1.conv" in name:
-                        #TODO
-                        pass
-
-                    elif "cv2.conv" in name:
-                        sorted_channels_c2fcv2=np.concatenate((sorted_channels_list[nstr+".cv1.conv"],sorted_channels_old[int(-1*out_channels_old):]))
-                        conv_weight_data = module.weight.data[:, sorted_channels_c2fcv2, ...]    
+                    if nstr+".m.0.cv1.conv" in name:
+                        in_channels = int(module.in_channels * (1-percentage))
+                        sorted_channels_input = sorted_channels_old[-1*in_channels:] - module.in_channels 
+                        conv_weight_data = module.weight.data[:,sorted_channels_input , ...]
+                    elif nstr+".cv2.conv" in name:
+                        in_channels = int(module.in_channels * (1-percentage))
+                        sorted_channels_input=np.concatenate((sorted_channels_list[nstr+".cv1.conv"],sorted_channels_old[int(-1*out_channels_old):] + int(module.in_channels*2/(2 + 1))))    # c2f n=1
+                        conv_weight_data = module.weight.data[:,sorted_channels_input , ...]
                     else:
+                        in_channels = int(module.in_channels * (1-percentage))
+                        sorted_channels_input = sorted_channels_old[-1*in_channels:]
+                        conv_weight_data = module.weight.data[:,sorted_channels_input , ...]
                         pass
-
+                    
                 else:
                     in_channels = int(module.in_channels * (1-percentage))
-                    conv_weight_data = module.weight.data[:, sorted_channels_old[-1*in_channels:], ...]
+                    sorted_channels_input = sorted_channels_old[-1*in_channels:]
+                    conv_weight_data = module.weight.data[:,sorted_channels_input , ...]
+                # print("sorted_channels_input", sorted_channels_input)
+
 
                 # 对通道进行排序,返回索引
                 importance_conv = torch.norm(conv_weight_data, 1, dim=(1, 2, 3))
                 
                 # 对out_channal维裁剪
-                if "linear_pred.2" in name or re.match(r"cv\d.\d.\d.conv",name) or re.match(r"cv\d.\d.\d",name) or "dfl" == name:
+                if "linear_pred.2" in name or re.match(r"cv\d.\d.\d.conv",name) or re.match(r"cv\d.\d.\d",name) or "dfl" == name: 
                     out_channels=module.out_channels  #  最后一层不变，sorted_channels也得操作一下
-                    sorted_channels_list[name] = range(out_channels)    # 最后一层不变sorted_channels
+                    sorted_channels_list[name] = np.array(range(out_channels))[-1*out_channels:]    # 最后一层不变sorted_channels
                     sorted_channels = sorted_channels_list[name]
                 elif re.match(r"conv3_for_(downsample\d|upsample\d).cv1.conv",name):
                     out_channels = int(module.out_channels * (1-percentage))
@@ -97,11 +108,11 @@ def prune(model, percentage):
                     importance_conv2 = importance_conv[int(module.out_channels*0.5):,...]
                     sorted_channels1 = np.argsort(np.concatenate([x.cpu().numpy().flatten() for x in importance_conv1]))  # 0.5用的是C2F的默认值
                     sorted_channels2 = np.argsort(np.concatenate([x.cpu().numpy().flatten() for x in importance_conv2]))
-                    sorted_channels_list[name] = np.concatenate((sorted_channels1[int(-1*out_channels*percentage):],sorted_channels2[int(-1*out_channels*percentage):]))
+                    sorted_channels_list[name] = np.concatenate((sorted_channels1[int(-1*out_channels*0.5):],sorted_channels2[int(-1*out_channels*0.5):] + int(module.out_channels*0.5)))  # split成一半
                     sorted_channels = sorted_channels_list[name]  
                 else:
                     out_channels = int(module.out_channels * (1-percentage))
-                    sorted_channels_list[name] = np.argsort(np.concatenate([x.cpu().numpy().flatten() for x in importance_conv]))
+                    sorted_channels_list[name] = np.argsort(np.concatenate([x.cpu().numpy().flatten() for x in importance_conv]))[-1*out_channels:] 
                     sorted_channels = sorted_channels_list[name]
                     pass
                 if re.match(r"conv3_for_(downsample\d|upsample\d).cv2.conv",name):   # c2f 剪枝后要改c的值
@@ -116,37 +127,40 @@ def prune(model, percentage):
                                         groups=module.groups,
                                         bias=(module.bias is not None)
                                         ).to(device)
-                # in_channels = new_module.out_channels  # 因为前一层的输出通道会影响下一层的输入通道
-                # 重新分配权重 权重的shape[out_channels, in_channels, k, k]
-                # c2, c1, _, _ = new_module.weight.data.shape
-                # print(new_module.weight.data.shape)
-                # new_module.weight.data[...] = module.weight.data[num_channels_to_prune:, :c1, ...]
-                new_module.weight.data[...] = conv_weight_data[sorted_channels[-1*out_channels:], :,...]      # todo  输入层先不管他
+                
+                sorted_channels_output = sorted_channels
+                new_module.weight.data[...] = conv_weight_data[sorted_channels_output, :,...]      
                 if module.bias is not None:
-                    new_module.bias.data[...] = module.bias.data[sorted_channels[-1*out_channels:]]
+                    new_module.bias.data[...] = module.bias.data[sorted_channels_output]
+                # print("module",module)
+                # print("new_module",new_module)
                 # 用新卷积替换旧卷积
                 # setattr(model, name, new_module)
                 _set_module(model, f"{name}", new_module)
-                new_module_shape = new_module.weight.data.shape
-                print(new_module_shape[1],new_module_shape[0], end=" ")
+                # new_module_shape = new_module.weight.data.shape
+                # print(new_module_shape[1],new_module_shape[0], end=" ")
                 sorted_channels_old = sorted_channels
                 out_channels_old = out_channels
+                # print("sorted_channels_output", sorted_channels_output)
             elif isinstance(module, nn.BatchNorm2d):
-                print(module.num_features, end=" ")
-                new_bn = nn.BatchNorm2d(num_features=new_module.out_channels,
+                # print(module.num_features, end=" ")
+                num_features = out_channels_old
+                new_bn = nn.BatchNorm2d(num_features,
                                         eps=module.eps,
                                         momentum=module.momentum,
                                         affine=module.affine,
                                         track_running_stats=module.track_running_stats).to(next(model.parameters()).device)
-                new_bn.weight.data[...] = module.weight.data[sorted_channels_old[-1*out_channels:]]
+                new_bn.weight.data[...] = module.weight.data[sorted_channels_old]
+                new_bn.running_mean.data[...] = module.running_mean.data[sorted_channels_old]
+                new_bn.running_var.data[...] = module.running_var.data[sorted_channels_old]
                 if module.bias is not None:
-                    new_bn.bias.data[...] = module.bias.data[sorted_channels_old[-1*out_channels:]]
+                    new_bn.bias.data[...] = module.bias.data[sorted_channels_old]
                 # 用新bn替换旧bn
                 # setattr(model, name, new_bn)
                 _set_module(model, f"{name}", new_bn)
-                print(new_bn.num_features, end=" ")
-        print(" ")
-        if"cv3.2.2" == name:    # 结束了
+                # print(new_bn.num_features, end=" ")
+        # print(" ")
+        if "cv3.2.2" == name:
             break
     # return model
 

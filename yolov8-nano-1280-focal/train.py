@@ -14,6 +14,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 
 from nets.yolo import YoloBody
+from utils.prune_model import is_prune
 from nets.yolo_training import (Loss, ModelEMA, get_lr_scheduler,
                                 set_optimizer_lr, weights_init)
 from utils.callbacks import EvalCallback, LossHistory
@@ -98,7 +99,8 @@ if __name__ == "__main__":
     #      可以设置mosaic=True，直接随机初始化参数开始训练，但得到的效果仍然不如有预训练的情况。（像COCO这样的大数据集可以这样做）
     #   2、了解imagenet数据集，首先训练分类模型，获得网络的主干部分权值，分类模型的 主干部分 和该模型通用，基于此进行训练。
     #----------------------------------------------------------------------------------------------------------------------------#
-    model_path      = './logs/ep100-loss6.425-val_loss4.280.pth'
+    # model_path      = './logs/ep100-loss6.425-val_loss4.280.pth'
+    model_path        = './model_data/yolo-nano-best.pth'
     #------------------------------------------------------#
     #   input_shape     输入的shape大小，一定要是32的倍数
     #------------------------------------------------------#
@@ -373,13 +375,14 @@ if __name__ == "__main__":
     #   output: prune_model 裁剪好的model
     #   和predict部分有一点差别，没加fuse
     #-------------------------------------------------------------------------#
-    is_prune = True
+    # is_prune = True
 
     if is_prune == True:
         total_param = count_params(model)
         print("Number of parameter: %.2fM" % (total_param / 1e6))
-        percentage = 0.5
-        prune(model, percentage)
+        # percentage = 0.5
+        # prune(model, percentage)
+        prune(model)
         total_prune_param = count_params(model)
         print("Number of pruned model parameter: %.2fM" % (total_prune_param / 1e6))
 

@@ -88,6 +88,40 @@ class YoloBody(nn.Module):
         # self.conv_160_256 = torch.nn.Conv2d(160, 256, kernel_size=1)
         # self.conv_256_512 = torch.nn.Conv2d(256, 512, kernel_size=1)
 
+        ######################################################################################改
+        self.linear_c3 = MLP(input_dim=in_channels[1], embed_dim=out_channels)
+        self.linear_c2 = MLP(input_dim=in_channels[2], embed_dim=out_channels)
+        self.linear_c1 = MLP(input_dim=in_channels[3], embed_dim=out_channels)
+
+        self.linear_fuse = nn.Conv2d(
+            in_channels=out_channels*3,
+            out_channels=out_channels,
+            kernel_size=1,
+        )
+
+        self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False)
+        
+        self.dropout = nn.Dropout2d(0.3)
+        
+            
+        self.decode = nn.Sequential(
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=False),
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=False)
+        )       
+
+        self.seg_num_classes = 4
+        #self.linear_pred = nn.Conv2d(out_channels, num_class, kernel_size=1)
+        self.linear_pred = nn.Sequential(
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(inplace=False),
+            nn.Conv2d(out_channels, self.seg_num_classes, kernel_size=3, stride=1, padding=1))
+        #! 不要随意修改定义顺序
+        
+        ######################################################################################改
 
         #------------------------加强特征提取网络------------------------# 
         self.upsample   = nn.Upsample(scale_factor=2, mode="nearest")
@@ -116,7 +150,7 @@ class YoloBody(nn.Module):
         self.reg_max    = 16  # DFL channels (ch[0] // 16 to scale 4/8/12/16/20 for n/s/m/l/x)
         self.no         = num_classes + self.reg_max * 4  # number of outputs per anchor
         self.num_classes = num_classes
-        self.seg_num_classes = 4
+        
         
         c2, c3   = max((16, ch[0] // 4, self.reg_max * 4)), max(ch[0], num_classes)  # channels
         self.cv2 = nn.ModuleList(nn.Sequential(Conv(x, c2, 3), Conv(c2, c2, 3), nn.Conv2d(c2, 4 * self.reg_max, 1)) for x in ch)
@@ -124,39 +158,6 @@ class YoloBody(nn.Module):
         if not pretrained:
             weights_init(self)
         self.dfl = DFL(self.reg_max) if self.reg_max > 1 else nn.Identity()
-
-        ######################################################################################改
-        self.linear_c3 = MLP(input_dim=in_channels[1], embed_dim=out_channels)
-        self.linear_c2 = MLP(input_dim=in_channels[2], embed_dim=out_channels)
-        self.linear_c1 = MLP(input_dim=in_channels[3], embed_dim=out_channels)
-
-        self.linear_fuse = nn.Conv2d(
-            in_channels=out_channels*3,
-            out_channels=out_channels,
-            kernel_size=1,
-        )
-
-        self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False)
-        
-        self.dropout = nn.Dropout2d(0.1)
-        
-            
-        self.decode = nn.Sequential(
-            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=False),
-            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=False)
-)
-        #self.linear_pred = nn.Conv2d(out_channels, num_class, kernel_size=1)
-        self.linear_pred = nn.Sequential(
-            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(inplace=False),
-            nn.Conv2d(out_channels, self.seg_num_classes, kernel_size=3, stride=1, padding=1))
-        
-        
-        ######################################################################################改
 
 
     def fuse(self):

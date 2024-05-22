@@ -15,7 +15,7 @@ from utils.utils_bbox import DecodeBox
 import cv2
 
 from PIL import Image
-
+from utils.prune_model import is_prune
 '''
 训练自己的数据集必看注释！
 '''
@@ -29,7 +29,8 @@ class YOLO(object):
         #   验证集损失较低不代表mAP较高，仅代表该权值在验证集上泛化性能较好。
         #   如果出现shape不匹配，同时要注意训练时的model_path和classes_path参数的修改
         #--------------------------------------------------------------------------#
-        "model_path"        : '/home/zijian/projects/LJK/yolov8-nano-1280-focal-mosaic-copy/logs/ep090-loss6.543-val_loss4.231.pth',
+        # "model_path"        : './logs/last_epoch_weights.pth',
+        "model_path"        : './model_data/yolo-nano-best.pth',
         "classes_path"      : 'model_data/voc_classes.txt',
         #---------------------------------------------------------------------#
         #   输入图片的大小，必须为32的倍数。
@@ -62,6 +63,7 @@ class YOLO(object):
         #   没有GPU可以设置成False
         #-------------------------------#
         "cuda"              : True,
+
     }
 
     @classmethod
@@ -79,7 +81,6 @@ class YOLO(object):
         for name, value in kwargs.items():
             setattr(self, name, value)
             self._defaults[name] = value 
-            
         #---------------------------------------------------#
         #   获得种类和先验框的数量
         #---------------------------------------------------#
@@ -107,13 +108,21 @@ class YOLO(object):
         
         device      = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.net.load_state_dict(torch.load(self.model_path, map_location=device))
+        if(is_prune != True):
+            self.net    = self.net.fuse().eval()
+            print('{} model, and classes loaded.'.format(self.model_path))
+            if not onnx:
+                if self.cuda:
+                    self.net = nn.DataParallel(self.net)
+                    self.net = self.net.cuda()
+
+    def generate_fuse(self, onnx=False):
         self.net    = self.net.fuse().eval()
         print('{} model, and classes loaded.'.format(self.model_path))
-        if not onnx:
+        if not onnx: 
             if self.cuda:
                 self.net = nn.DataParallel(self.net)
                 self.net = self.net.cuda()
-
     #---------------------------------------------------#
     #   检测图片
     #---------------------------------------------------#
