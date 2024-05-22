@@ -2,6 +2,14 @@
 
 For DAC2024
 
+2024.5.5
+channal pruning v1
+没有裁剪backbone和最后的cv2cv3的输出channal，中间裁减了一下
+train.py 和predict.py 均有is_prune属性，置True就开始了。
+暂时可能似乎只有0.5好用，四舍五入时候也许会出问题（我也不确定）
+channal的对应顺序没有严格check，大体上没有问题
+
+
 2024.4.29
 新增两个nano文件夹，其中数据集和logs文件夹删除，需要重新在root下创建一个logs文件夹，再把voc2007复制进对应路径，之后运行voc_annotations.py即可。此外共享链接里面是两个pretrain model和两个train后的目前最好版本。
 ```
