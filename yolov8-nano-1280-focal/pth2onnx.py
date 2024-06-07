@@ -20,6 +20,7 @@ def pth_to_onnx(input, checkpoint, onnx_path, input_names=['input'], output_name
     # model.to(device)
     
     torch.onnx.export(model, input, onnx_path, verbose=True, input_names=input_names, output_names=output_names) #指定模型的输入，以及onnx的输出路径
+    torch.onnx.export(model, input, onnx_path, verbose=True, input_names=input_names, output_names=output_names, opset_version=15) #指定模型的输入，以及onnx的输出路径
     print("Exporting .pth model to onnx model has been successful!")
 
 if __name__ == '__main__':
