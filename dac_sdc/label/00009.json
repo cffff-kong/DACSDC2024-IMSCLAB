@@ -1,0 +1,117 @@
+[
+ {
+  "type": 2,
+  "x": 786,
+  "y": 484,
+  "width": 138,
+  "height": 142,
+  "segmentation": []
+ },
+ {
+  "type": 2,
+  "x": 241,
+  "y": 485,
+  "width": 40,
+  "height": 48,
+  "segmentation": []
+ },
+ {
+  "type": 2,
+  "x": 297,
+  "y": 484,
+  "width": 38,
+  "height": 52,
+  "segmentation": []
+ },
+ {
+  "type": 2,
+  "x": 417,
+  "y": 499,
+  "width": 46,
+  "height": 64,
+  "segmentation": []
+ },
+ {
+  "type": 1,
+  "x": 14,
+  "y": 415,
+  "width": 198,
+  "height": 231,
+  "segmentation": []
+ },
+ {
+  "type": 7,
+  "x": 1183,
+  "y": 295,
+  "width": 22,
+  "height": 54,
+  "segmentation": []
+ },
+ {
+  "type": 7,
+  "x": 1141,
+  "y": 319,
+  "width": 24,
+  "height": 19,
+  "segmentation": []
+ },
+ {
+  "type": 7,
+  "x": 1106,
+  "y": 311,
+  "width": 23,
+  "height": 48,
+  "segmentation": []
+ },
+ {
+  "type": 6,
+  "x": 366,
+  "y": 335,
+  "width": 17,
+  "height": 43,
+  "segmentation": []
+ },
+ {
+  "type": 6,
+  "x": 473,
+  "y": 337,
+  "width": 20,
+  "height": 44,
+  "segmentation": []
+ },
+ {
+  "type": 10,
+  "x": -1,
+  "y": -1,
+  "width": -1,
+  "height": -1,
+  "segmentation": [
+   [
+    1280,
+    646.828,
+    1265.481,
+    650.457,
+    1103.444,
+    669.226,
+    891.983,
+    691.123,
+    764.355,
+    699.256,
+    398.99,
+    708.64,
+    205.672,
+    701.759,
+    29.245,
+    696.754,
+    28.62,
+    695.502,
+    0,
+    708.865,
+    0,
+    720,
+    1280,
+    720
+   ]
+  ]
+ }
+]

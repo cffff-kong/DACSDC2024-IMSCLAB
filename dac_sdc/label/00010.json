@@ -1,0 +1,167 @@
+[
+ {
+  "type": 3,
+  "x": 802,
+  "y": 590,
+  "width": 72,
+  "height": 209,
+  "segmentation": []
+ },
+ {
+  "type": 3,
+  "x": 749,
+  "y": 648,
+  "width": 53,
+  "height": 152,
+  "segmentation": []
+ },
+ {
+  "type": 1,
+  "x": 5,
+  "y": 668,
+  "width": 46,
+  "height": 88,
+  "segmentation": []
+ },
+ {
+  "type": 1,
+  "x": 5,
+  "y": 634,
+  "width": 113,
+  "height": 98,
+  "segmentation": []
+ },
+ {
+  "type": 1,
+  "x": 5,
+  "y": 617,
+  "width": 140,
+  "height": 86,
+  "segmentation": []
+ },
+ {
+  "type": 1,
+  "x": 99,
+  "y": 624,
+  "width": 102,
+  "height": 73,
+  "segmentation": []
+ },
+ {
+  "type": 1,
+  "x": 257,
+  "y": 642,
+  "width": 57,
+  "height": 31,
+  "segmentation": []
+ },
+ {
+  "type": 1,
+  "x": 319,
+  "y": 644,
+  "width": 29,
+  "height": 27,
+  "segmentation": []
+ },
+ {
+  "type": 1,
+  "x": 355,
+  "y": 642,
+  "width": 61,
+  "height": 42,
+  "segmentation": []
+ },
+ {
+  "type": 1,
+  "x": 388,
+  "y": 641,
+  "width": 63,
+  "height": 66,
+  "segmentation": []
+ },
+ {
+  "type": 1,
+  "x": 422,
+  "y": 627,
+  "width": 91,
+  "height": 88,
+  "segmentation": []
+ },
+ {
+  "type": 1,
+  "x": 458,
+  "y": 643,
+  "width": 203,
+  "height": 107,
+  "segmentation": []
+ },
+ {
+  "type": 1,
+  "x": 636,
+  "y": 636,
+  "width": 126,
+  "height": 66,
+  "segmentation": []
+ },
+ {
+  "type": 1,
+  "x": 828,
+  "y": 623,
+  "width": 273,
+  "height": 90,
+  "segmentation": []
+ },
+ {
+  "type": 1,
+  "x": 911,
+  "y": 607,
+  "width": 336,
+  "height": 158,
+  "segmentation": []
+ },
+ {
+  "type": 1,
+  "x": 1015,
+  "y": 602,
+  "width": 385,
+  "height": 186,
+  "segmentation": []
+ },
+ {
+  "type": 1,
+  "x": 1171,
+  "y": 537,
+  "width": 719,
+  "height": 352,
+  "segmentation": []
+ },
+ {
+  "type": 1,
+  "x": 1512,
+  "y": 559,
+  "width": 399,
+  "height": 396,
+  "segmentation": []
+ },
+ {
+  "type": 9,
+  "x": -1,
+  "y": -1,
+  "width": -1,
+  "height": -1,
+  "segmentation": [
+   [
+    1253.498,
+    995.445,
+    1283.368,
+    989.471,
+    533.723,
+    744.991,
+    523.45,
+    745.306,
+    523.402,
+    745.429
+   ]
+  ]
+ }
+]
