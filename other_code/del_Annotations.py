@@ -1,7 +1,7 @@
 import os
 
 # 设置文件夹路径，将这里的'your_directory_path'替换为您存放.xml文件的实际路径
-your_directory_path = './Annotations'
+your_directory_path = 'DACSDC2024-IMSCLAB/VOCdevit/VOC2007/Annotations'
 
 # 列出文件夹中所有文件
 files_in_directory = os.listdir(your_directory_path)

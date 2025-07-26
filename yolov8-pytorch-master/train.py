@@ -22,8 +22,6 @@ from utils.utils import (download_weights, get_classes, seed_everything,
                          show_config, worker_init_fn)
 from utils.utils_fit import fit_one_epoch
 
-from mmengine.runner import load_checkpoint
-
 '''
 训练自己的目标检测模型一定需要注意以下几点：
 1、训练前仔细检查自己的格式是否满足要求，该库要求数据集格式为VOC格式，需要准备好的内容有输入图片和标签
@@ -76,7 +74,7 @@ if __name__ == "__main__":
     #   classes_path    指向model_data下的txt，与自己训练的数据集相关 
     #                   训练前一定要修改classes_path，使其对应自己的数据集
     #---------------------------------------------------------------------#
-    classes_path    = '/home/kongdechang/python/yolo_ljk/DACSDC2024-IMSCLAB/VOCdevit/VOC2007/label.txt'
+    classes_path    = 'model_data/voc_classes.txt'
     #----------------------------------------------------------------------------------------------------------------------------#
     #   权值文件的下载请看README，可以通过网盘下载。模型的 预训练权重 对不同数据集是通用的，因为特征是通用的。
     #   模型的 预训练权重 比较重要的部分是 主干特征提取网络的权值部分，用于进行特征提取。
@@ -96,7 +94,7 @@ if __name__ == "__main__":
     #      可以设置mosaic=True，直接随机初始化参数开始训练，但得到的效果仍然不如有预训练的情况。（像COCO这样的大数据集可以这样做）
     #   2、了解imagenet数据集，首先训练分类模型，获得网络的主干部分权值，分类模型的 主干部分 和该模型通用，基于此进行训练。
     #----------------------------------------------------------------------------------------------------------------------------#
-    model_path      = './model_data/mit_b0.pth'
+    model_path      = 'model_data/yolov8_s.pth'
     #------------------------------------------------------#
     #   input_shape     输入的shape大小，一定要是32的倍数
     #------------------------------------------------------#
@@ -250,8 +248,6 @@ if __name__ == "__main__":
     #------------------------------------------------------#
     train_annotation_path   = '2007_train.txt'
     val_annotation_path     = '2007_val.txt'
-    train_seg_path          = 'seg_train.txt'
-    val_seg_path            = 'seg_val.txt'
 
     seed_everything(seed)
     #------------------------------------------------------#
@@ -302,45 +298,17 @@ if __name__ == "__main__":
         #------------------------------------------------------#
         #   根据预训练权重的Key和模型的Key进行加载
         #------------------------------------------------------#
-        ######################################################################读repvit
-        # model_dict = torch.load(model_path, map_location = device)
-        # pretrained_dict = model_dict['model']
-        # pretrained_dict = {k: v for k, v in pretrained_dict.items() if "classifier" not in k}
-        # model_dict = pretrained_dict
-        # load_key, no_load_key, temp_dict = [], [], {}
-        # for k, v in pretrained_dict.items():
-        #     # print(f'k: {k},shape(pretrained_dict[k]): {np.shape(pretrained_dict[k])}, shape(v): {np.shape(v)}')
-        #     if k in pretrained_dict.keys() and np.shape(pretrained_dict[k]) == np.shape(v):
-                
-        #         temp_dict[k] = v
-        #         load_key.append(k)
-        #     else:
-        #         no_load_key.append(k)
-        # model_dict.update(temp_dict)
-        # model.backbone.load_state_dict(model_dict)
-        ######################################################################读repvit
-
-        ######################################################################读segformer
-        model_dict = torch.load(model_path, map_location = device)
-        pretrained_dict = model_dict
-        new_state_dict = {}
-        for key, value in pretrained_dict.items():
-            new_key = 'backbone.' + key 
-            new_state_dict[new_key] = value
-        pretrained_dict = new_state_dict
+        model_dict      = model.state_dict()
+        pretrained_dict = torch.load(model_path, map_location = device)
         load_key, no_load_key, temp_dict = [], [], {}
         for k, v in pretrained_dict.items():
-            # print(f'k: {k},shape(pretrained_dict[k]): {np.shape(pretrained_dict[k])}, shape(v): {np.shape(v)}')
-            if k in pretrained_dict.keys() and np.shape(pretrained_dict[k]) == np.shape(v):
-                
+            if k in model_dict.keys() and np.shape(model_dict[k]) == np.shape(v):
                 temp_dict[k] = v
                 load_key.append(k)
             else:
                 no_load_key.append(k)
         model_dict.update(temp_dict)
-        model.backbone.load_state_dict(model_dict, strict=False)
-        # model = load_checkpoint(model, model_path, map_location = device, strict=False)
-        ######################################################################读segformer
+        model.load_state_dict(model_dict)
         #------------------------------------------------------#
         #   显示没有匹配上的Key
         #------------------------------------------------------#
@@ -406,12 +374,6 @@ if __name__ == "__main__":
         train_lines = f.readlines()
     with open(val_annotation_path, encoding='utf-8') as f:
         val_lines   = f.readlines()
-
-    with open(train_seg_path, encoding='utf-8') as f:
-        seg_train_lines = f.readlines()
-    with open(val_seg_path, encoding='utf-8') as f:
-        seg_val_lines   = f.readlines()
-
     num_train   = len(train_lines)
     num_val     = len(val_lines)
 
@@ -487,8 +449,6 @@ if __name__ == "__main__":
         optimizer.add_param_group({"params": pg1, "weight_decay": weight_decay})
         optimizer.add_param_group({"params": pg2})
 
-        # optimizer = optim.SGD(model.parameters(), lr=Init_lr_fit, momentum=momentum, nesterov=True)
-
         #---------------------------------------#
         #   获得学习率下降的公式
         #---------------------------------------#
@@ -509,9 +469,9 @@ if __name__ == "__main__":
         #---------------------------------------#
         #   构建数据集加载器。
         #---------------------------------------#
-        train_dataset   = YoloDataset(train_lines, seg_train_lines, input_shape, num_classes, epoch_length=UnFreeze_Epoch, \
+        train_dataset   = YoloDataset(train_lines, input_shape, num_classes, epoch_length=UnFreeze_Epoch, \
                                         mosaic=mosaic, mixup=mixup, mosaic_prob=mosaic_prob, mixup_prob=mixup_prob, train=True, special_aug_ratio=special_aug_ratio)
-        val_dataset     = YoloDataset(val_lines, seg_val_lines, input_shape, num_classes, epoch_length=UnFreeze_Epoch, \
+        val_dataset     = YoloDataset(val_lines, input_shape, num_classes, epoch_length=UnFreeze_Epoch, \
                                         mosaic=False, mixup=False, mosaic_prob=0, mixup_prob=0, train=False, special_aug_ratio=0)
         
         if distributed:

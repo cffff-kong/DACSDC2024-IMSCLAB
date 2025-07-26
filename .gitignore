@@ -3,3 +3,4 @@ yolov8-nano-1280-focal/2007_train.txt
 yolov8-nano-1280-focal/2007_val.txt
 yolov8-nano-1280-focal/seg_train.txt
 yolov8-nano-1280-focal/seg_val.txt
+VOCdevit/

@@ -1,5 +1,7 @@
 # DAC2024-IMSCLAB
-
+```bash
+pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+```
 For DAC2024
 最终会用到的文件夹有三个：yolov8-nano-1280-focal,other_code,dac_sdc
 

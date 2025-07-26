@@ -6,7 +6,7 @@ from xml.etree import ElementTree as ET
 def process_files(xml_folder, json_folder, output_folder):
     # 获取所有的XML文件
     xml_files = [f for f in os.listdir(xml_folder) if f.endswith('.xml')]
-
+    
     for xml_file in xml_files:
         # 构建JSON文件的路径
         json_file = xml_file.replace('.xml', '.json')
@@ -41,11 +41,12 @@ def process_files(xml_folder, json_folder, output_folder):
         # 保存图像
         output_image_path = os.path.join(output_folder, xml_file.replace('.xml', '.png'))
         image.save(output_image_path)
+    print(f"Image saved to {output_image_path}")
 
 # 设置文件夹路径
-xml_folder = './Annotations'
-json_folder = './label'
-output_folder = './seg'
+xml_folder = 'DACSDC2024-IMSCLAB/VOCdevit/VOC2007/Annotations'
+json_folder = 'DACSDC2024-IMSCLAB/VOCdevit/VOC2007/label'
+output_folder = 'DACSDC2024-IMSCLAB/VOCdevit/VOC2007/seg'
 
 # 确保输出文件夹存在
 os.makedirs(output_folder, exist_ok=True)

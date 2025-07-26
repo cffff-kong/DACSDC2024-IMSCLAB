@@ -12,7 +12,7 @@ from utils.utils import get_classes
 #   annotation_mode为1代表获得VOCdevkit/VOC2007/ImageSets里面的txt
 #   annotation_mode为2代表获得训练用的2007_train.txt、2007_val.txt
 #--------------------------------------------------------------------------------------------------------------------------------#
-annotation_mode     = 2
+annotation_mode     = 0
 #-------------------------------------------------------------------#
 #   必须要修改，用于生成2007_train.txt、2007_val.txt的目标信息
 #   与训练和预测所用的classes_path一致即可
@@ -20,19 +20,19 @@ annotation_mode     = 2
 #   那么就是因为classes没有设定正确
 #   仅在annotation_mode为0和2的时候有效
 #-------------------------------------------------------------------#
-classes_path = '/home/kongdechang/python/yolo_ljk/DACSDC2024-IMSCLAB/VOCdevit/VOC2007/label.txt'
+classes_path        = 'model_data/voc_classes.txt'
 #--------------------------------------------------------------------------------------------------------------------------------#
 #   trainval_percent用于指定(训练集+验证集)与测试集的比例，默认情况下 (训练集+验证集):测试集 = 9:1
 #   train_percent用于指定(训练集+验证集)中训练集与验证集的比例，默认情况下 训练集:验证集 = 9:1
 #   仅在annotation_mode为0和1的时候有效
 #--------------------------------------------------------------------------------------------------------------------------------#
-trainval_percent    = 0.9 
+trainval_percent    = 0.9
 train_percent       = 0.9
 #-------------------------------------------------------#
 #   指向VOC数据集所在的文件夹
 #   默认指向根目录下的VOC数据集
 #-------------------------------------------------------#
-VOCdevkit_path  = '/home/kongdechang/python/yolo_ljk/DACSDC2024-IMSCLAB/VOCdevit'
+VOCdevkit_path  = 'VOCdevkit'
 
 VOCdevkit_sets  = [('2007', 'train'), ('2007', 'val')]
 classes, _      = get_classes(classes_path)
@@ -42,11 +42,10 @@ classes, _      = get_classes(classes_path)
 #-------------------------------------------------------#
 photo_nums  = np.zeros(len(VOCdevkit_sets))
 nums        = np.zeros(len(classes))
-# 写入 bbox和类别信息
 def convert_annotation(year, image_id, list_file):
     in_file = open(os.path.join(VOCdevkit_path, 'VOC%s/Annotations/%s.xml'%(year, image_id)), encoding='utf-8')
     tree=ET.parse(in_file)
-    root = tree.getroot() #<annotation>
+    root = tree.getroot()
 
     for obj in root.iter('object'):
         difficult = 0 
@@ -57,7 +56,6 @@ def convert_annotation(year, image_id, list_file):
             continue
         cls_id = classes.index(cls)
         xmlbox = obj.find('bndbox')
-        # xmin, ymin, xmax, ymax,class
         b = (int(float(xmlbox.find('xmin').text)), int(float(xmlbox.find('ymin').text)), int(float(xmlbox.find('xmax').text)), int(float(xmlbox.find('ymax').text)))
         list_file.write(" " + ",".join([str(a) for a in b]) + ',' + str(cls_id))
         
@@ -68,7 +66,6 @@ if __name__ == "__main__":
     if " " in os.path.abspath(VOCdevkit_path):
         raise ValueError("数据集存放的文件夹路径与图片名称中不可以存在空格，否则会影响正常的模型训练，请注意修改。")
 
-    # 生成train.txt和val.txt
     if annotation_mode == 0 or annotation_mode == 1:
         print("Generate txt in ImageSets.")
         xmlfilepath     = os.path.join(VOCdevkit_path, 'VOC2007/Annotations')
@@ -111,28 +108,14 @@ if __name__ == "__main__":
         print("Generate txt in ImageSets done.")
 
     if annotation_mode == 0 or annotation_mode == 2:
-        print("Generate seg_train.txt and seg_val.txt for segmentation.")
-
-        for year, image_set in VOCdevkit_sets:    #VOCdevkit_sets  = [('2007', 'train'), ('2007', 'val')]
-            image_ids = open(os.path.join(VOCdevkit_path, 'VOC%s/ImageSets/Main/%s.txt'%(year, image_set)), encoding='utf-8').read().strip().split()
-            seg_list_file = open('seg_%s.txt' % image_set, 'w', encoding='utf-8')
-            # 原图路径+segment mask路径
-            for image_id in image_ids:
-                jpg_file = '%s/VOC%s/JPEGImages/%s.jpg'%(os.path.abspath(VOCdevkit_path), year, image_id)
-                seg_file = '%s/VOC%s/seg/%s.png'%(os.path.abspath(VOCdevkit_path), year, image_id)
-                seg_list_file.write(jpg_file + " " + seg_file + '\n')
-
-            seg_list_file.close()
-        print('--------------------------------------------------')
         print("Generate 2007_train.txt and 2007_val.txt for train.")
         type_index = 0
         for year, image_set in VOCdevkit_sets:
             image_ids = open(os.path.join(VOCdevkit_path, 'VOC%s/ImageSets/Main/%s.txt'%(year, image_set)), encoding='utf-8').read().strip().split()
             list_file = open('%s_%s.txt'%(year, image_set), 'w', encoding='utf-8')
-            # 原图路径+bbox+class
             for image_id in image_ids:
                 list_file.write('%s/VOC%s/JPEGImages/%s.jpg'%(os.path.abspath(VOCdevkit_path), year, image_id))
-                
+
                 convert_annotation(year, image_id, list_file)
                 list_file.write('\n')
             photo_nums[type_index] = len(image_ids)
@@ -149,7 +132,6 @@ if __name__ == "__main__":
                 print()
 
         str_nums = [str(int(x)) for x in nums]
-        print(str_nums)
         tableData = [
             classes, str_nums
         ]
